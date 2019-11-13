@@ -93,28 +93,36 @@ Plotly.plot('plot', [{
     }
 });
 
+//     This function calculates the prices for each package and returns them as an array in order of 'packages'. 
 function updatePlot(){
     for (var key in sliders){
         document.getElementById(key + '_i').innerHTML = sliders[key].value;
     }
     var values = [
+        
+//         Epic Pass Local
         tickets.epic + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day + parseInt(sliders.snoqualmie_nights.value) * tickets.night
         + parseInt(sliders.alpental_days.value) * tickets.alpental_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day,
 
+//         Ikon Pass
         tickets.ikon + parseInt(sliders.whistler_days.value) * tickets.whistler_day
-        + Math.max((parseInt(sliders.snoqualmie_nights.value) - 5), 0) * tickets.night
+        + Math.max((parseInt(sliders.snoqualmie_nights.value) - 5), 0) * tickets.night  // 5 days at snoqualmie summit
         + parseInt(sliders.alpental_days.value) * tickets.alpental_day + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
 
+//         Ikon + Snoqualmie LTD
         tickets.ikon + tickets.ltd + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.alpental_days.value) * tickets.alpental_day
         + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
 
+//         Ikon + Snoqualmie Unlimited
         tickets.ikon + tickets.unlimited + parseInt(sliders.whistler_days.value) * tickets.whistler_day
         + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
 
+//         Snoqualmie LTD
         tickets.ltd + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day
         + parseInt(sliders.stevens_days.value) * tickets.stevens_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day
         + parseInt(sliders.alpental_days.value) * tickets.alpental_day,
 
+//         Snoqualmie Unlimited
         tickets.unlimited + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day
         + parseInt(sliders.stevens_days.value) * tickets.stevens_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day
     ];
