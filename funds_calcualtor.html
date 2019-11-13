@@ -1,0 +1,135 @@
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container w-75">
+        <h1 class="h1">Season Ticket Cost Estimator</h1>
+        <div id="plot"></div><br>
+        <div class="row">
+            <div class="col-sm-2"><label>Days at Whistler: </label></div>
+            <div class="col-xs"><p id="whistler_days_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="2" id="whistler_days"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"><label>Days at Revelstoke: </label></div>
+            <div class="col-xs"><p id="revelstoke_days_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="2" id="revelstoke_days"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"><label>Snoqualmie Nights: </label></div>
+            <div class="col-xs"><p id="snoqualmie_nights_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="14" id="snoqualmie_nights"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"><label>Days at Alpental: </label></div>
+            <div class="col-xs"><p id="alpental_days_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="6" id="alpental_days"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"><label>Days at Stevens: </label></div>
+            <div class="col-xs"><p id="stevens_days_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="1" id="stevens_days"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2"><label>Days at Crystal: </label></div>
+            <div class="col-xs"><p id="crystal_days_i"></p></div>
+            <div class="col-xl"><input class="custom-range span2" type="range" min="0" max="20" value="0" id="crystal_days"></div>
+        </div>
+    </div>
+</body>
+
+<script>
+var tickets = {
+    ltd: 359.0,
+    unlimited: 399.0,
+    night: 25.0,
+    alpental_day: 75.0,
+    whistler_day: 173.21 / 2.0,
+    revelstoke_day: 170.17 / 2.0,
+    ikon: 599.0,
+    epic: 739.0,
+    crystal_day: 80.0,
+    stevens_day: 80.0
+};
+
+var days = {
+    whistler: 2,
+    revelstoke: 2,
+    snoq_night: 14,
+    alpental: 5,
+    stevens: 2,
+    crystal: 2
+};
+
+var packages = ['Epic', 'Icon', 'Ikon + LTD', 'Ikon + Unlimited', 'LTD', 'Unlimited'];
+
+var sliders = {
+    whistler_days: document.getElementById("whistler_days"),
+    revelstoke_days: document.getElementById("revelstoke_days"),
+    snoqualmie_nights: document.getElementById("snoqualmie_nights"),
+    alpental_days: document.getElementById("alpental_days"),
+    stevens_days: document.getElementById("stevens_days"),
+    crystal_days: document.getElementById("crystal_days")
+};
+
+Plotly.plot('plot', [{
+    type: 'bar',
+    x: packages,
+    y: [0, 0, 0, 0, 0, 0],
+    textposition: 'auto',
+}], {
+    xaxis: {
+        title: {text: 'Pass Options'}
+    },
+    yaxis: {
+        tickformat: '$',
+        title: {text: 'Total Season Cost $'}
+    },
+    title: {
+        text: 'Option Comparison'
+    }
+});
+
+function updatePlot(){
+    for (var key in sliders){
+        document.getElementById(key + '_i').innerHTML = sliders[key].value;
+    }
+    var values = [
+        tickets.epic + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day + parseInt(sliders.snoqualmie_nights.value) * tickets.night
+        + parseInt(sliders.alpental_days.value) * tickets.alpental_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day,
+
+        tickets.ikon + parseInt(sliders.whistler_days.value) * tickets.whistler_day
+        + Math.max((parseInt(sliders.snoqualmie_nights.value) - 5), 0) * tickets.night
+        + parseInt(sliders.alpental_days.value) * tickets.alpental_day + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
+
+        tickets.ikon + tickets.ltd + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.alpental_days.value) * tickets.alpental_day
+        + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
+
+        tickets.ikon + tickets.unlimited + parseInt(sliders.whistler_days.value) * tickets.whistler_day
+        + parseInt(sliders.stevens_days.value) * tickets.stevens_day,
+
+        tickets.ltd + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day
+        + parseInt(sliders.stevens_days.value) * tickets.stevens_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day
+        + parseInt(sliders.alpental_days.value) * tickets.alpental_day,
+
+        tickets.unlimited + parseInt(sliders.whistler_days.value) * tickets.whistler_day + parseInt(sliders.revelstoke_days.value) * tickets.revelstoke_day
+        + parseInt(sliders.stevens_days.value) * tickets.stevens_day + parseInt(sliders.crystal_days.value) * tickets.crystal_day
+    ];
+    console.log(values)
+    Plotly.restyle('plot', {y: [values]});
+    text = [];
+    for (i = 0; i < values.length; i++){
+        text.push('$' + values[i].toFixed(2));
+    }
+    Plotly.restyle('plot', {text: [text]});
+}
+
+for (var key in sliders){
+    sliders[key].oninput = updatePlot;
+}
+
+updatePlot();
+</script>
