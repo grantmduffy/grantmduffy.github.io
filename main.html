@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+
+<style>
+
+    .list-group-item {
+        display: list-item;
+    }
+
+</style>
+
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Driver Ranking</h1>
+        <div class="panel panel-default">
+            <label for="name">Your Name</label>
+            <input type="text" class="form-control" id="name">
+            <label for="token">Password</label>
+            <input type="password" class="form-control" id="token">
+        </div>
+        <div class="panel panel-default">
+            <ol class="list-group list-group-numbered" id="demo1">
+              <li class="list-group-item">Lewis Hamilton</li>
+              <li class="list-group-item">George Russell</li>
+              <li class="list-group-item">Max Verstappen</li>
+              <li class="list-group-item">Sergio Perez</li>
+              <li class="list-group-item">Daniel Ricciardo</li>
+              <li class="list-group-item">Lando Norris</li>
+              <li class="list-group-item">Charles Leclerc</li>
+              <li class="list-group-item">Carlos Sainz</li>
+              <li class="list-group-item">Fernando Alonso</li>
+              <li class="list-group-item">Esteban Ocon</li>
+              <li class="list-group-item">Pierre Gasly</li>
+              <li class="list-group-item">Yuki Tsunoda</li>
+              <li class="list-group-item">Lance Stroll</li>
+              <li class="list-group-item">Sebastian Vettel</li>
+              <li class="list-group-item">Valtteri Bottas</li>
+              <li class="list-group-item">Guanyu Zhou</li>
+              <li class="list-group-item">Alex Albon</li>
+              <li class="list-group-item">Nicholas Latifi</li>
+              <li class="list-group-item">Mick Schumacher</li>
+              <li class="list-group-item">Nikita Mazepin</li>
+            </ol>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="submit()">Submit</button>
+    </div>
+</body>
+
+
+<script>
+
+var list = document.getElementById('demo1');
+var token_el = document.getElementById('token');
+var name_el = document.getElementById('name');
+var data = {};
+
+Sortable.create(list, {
+    animation: 100,
+    group: 'list-1',
+    draggable: '.list-group-item',
+    handle: '.list-group-item',
+    sort: true,
+    filter: '.sortable-disabled',
+    chosenClass: 'active'
+});
+
+function submit() {
+    var out = [];
+    for (var i = 0; i < list.children.length; i++) {
+        var child = list.children[i];
+        out.push(child.textContent);
+    }
+    var name = name_el.value.trim();
+    var filename = name.toLowerCase().replace(' ', '_') + '.json';
+    var token = token_el.value;
+    var content = btoa(JSON.stringify(out));
+    data = {
+        'message': 'Survey response for ' + name,
+        'content': content
+    };
+
+    console.log(token);
+    console.log(content);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://api.github.com/repos/grantmduffy/f1_2022_survey/contents/' + filename, false);
+    xhr.onreadystatechange = function() {
+        console.log(this.status);
+        console.log(this.responseText);
+        if (this.status == 200){
+            data['sha'] = JSON.parse(this.responseText)['sha'];
+        }
+    };
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.send();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', 'https://api.github.com/repos/grantmduffy/f1_2022_survey/contents/' + filename, true);
+    xhr.onreadystatechange = function() {
+        console.log(this.status);
+        console.log(this.responseText);
+        if (this.readyState == 4 && this.status == 200){
+            alert('Your response was successfully recorded');
+        }
+    };
+    xhr.setRequestHeader('Authorization', 'token ' + token);
+    xhr.send(JSON.stringify(data));
+
+}
+
+</script>
+
+</html>
