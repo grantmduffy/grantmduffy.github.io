@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<head>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+
+<style>
+
+input[type=range][orient=vertical]
+{
+    -webkit-appearance: slider-vertical;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #04AA6D;
+}
+
+</style>
+
+<script>
+
+
+
+</script>
+
+</head>
+
+<body style="height: 100vh">
+    <div class="container h-100">
+        <div class="row h-10 form-group">
+            <label for="col host">Host:</label>
+            <input type="text" class="col form-control" id="host">
+            <button class="col-4 btn btn-primary" onclick="startStop()">Start/Stop</button>
+            <a id="status">status</a>
+        </div>
+        <div class="row h-75">
+
+            <!-- <input class="slider col" type="range" id="steering_slider"
+            oninput="onChangeSteering(this.value)"/> -->
+            <div class="col h-75">
+                <input class="slider h-100 m-5 float-end" type="range" orient="vertical" 
+                oninput="onChangeThrottle(this.value)" onchange="release()" 
+                id="throttle_slider" value="0"/>
+            </div>
+        </div>
+    </div>
+<script>
+
+var throttle = 0;
+var steering = 0;
+var run = false;
+
+function onChangeSteering(val){
+    steering = parseFloat(val);
+}
+
+function onChangeThrottle(val) {
+    throttle = parseFloat(val);
+}
+
+function release(){
+    var i = document.getElementById("throttle_slider");
+    i.value = 0;
+    throttle = 0
+}
+
+function handleMotion(event){
+
+}
+
+function handleOrientation(event){
+    steering = event.alpha;
+}
+
+function startStop(){
+    if (!run){
+        window.addEventListener("deviceorientation", handleOrientation);
+        run = true;
+    } else {
+        window.removeEventListener("deviceorientation", handleOrientation);
+        run = false;
+    }
+    
+}
+
+function sendControl(){
+    if (!run){
+        return;
+    }
+    var e = document.getElementById("host");
+    var s = document.getElementById("status");
+    if (e.value == ""){
+        s.textContent = "No Host";
+        return;
+    }
+    s.textContent = "steering=" + steering + ", throttle=" + throttle;
+    var r = new XMLHttpRequest();
+    r.open("POST", "http://" + e.value);
+    r.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    r.send(JSON.stringify({
+        steering: steering,
+        throttle: throttle
+    }));
+}
+
+setInterval(sendControl, 50);
+
+</script>
+</body>
